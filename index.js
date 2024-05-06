@@ -1,35 +1,36 @@
 $(function () {
-  const rows = 20;
-  const cols = 20;
+  const rows = 50;
+  const cols = 10;
   const radius = 10;
-  
-  normalizeCanvas();
+
+  normalizeCanvas(rows, cols, radius);
   drawHexGrid(rows, cols, radius);
+  bindListeners();
 });
 
-// draws a grid of hexes of the given number of rows and columns, with given hex radius 
+// draws a grid of hexes of the given number of rows and columns, with given hex radius
 function drawHexGrid(rows, cols, radius) {
   const ctx = $("#canvas")[0].getContext("2d");
   const angle = Math.PI / 3;
   const side = Math.sqrt(3) * radius * Math.cos(Math.PI / 6);
   const offsetY = radius * (Math.sqrt(3) / 2);
 
-  for (let i=-1;i<rows;i++){
-    const centerYEven = i*offsetY*2;
-    drawHexLine(cols,centerYEven);
+  for (let i = 0; i < rows; i++) {
+    const centerYEven = (i +1)* offsetY * 2;
+    drawHexLine(cols, centerYEven);
   }
 
   /**
    * Draws a line of hexes, where the odd numbers are on the lower side
-   * @param {*} cols: number of columns, is array length 
-   * @param {*} centerYEven: the height of the center of the even hexes 
+   * @param {*} cols: number of columns, is array length
+   * @param {*} centerYEven: the height of the center of the even hexes
    */
-  function drawHexLine(cols,centerYEven) {
+  function drawHexLine(cols, centerYEven) {
     const centerYOdd = centerYEven + offsetY;
 
-    for (let i = -1; i < cols; i++) {
-      const centerX = side + i * side;
-      if (i % 2 === 0) {
+    for (let j = 0; j < cols; j++) {
+      const centerX = side + j * side - side*0.3;
+      if (j % 2 === 0) {
         // zero or even
         drawHex(centerX, centerYEven);
       } else {
@@ -51,11 +52,42 @@ function drawHexGrid(rows, cols, radius) {
     }
     ctx.closePath();
     ctx.stroke();
+    ctx.fillText(`1`,centerX,centerY)
   }
 }
 
-function normalizeCanvas() {
+function normalizeCanvas(rows, cols, radius) {
   const canvas = $("#canvas")[0];
-  canvas.width = 500;// window.innerWidth;
-  canvas.height = 500;// window.innerHeight;
+  const angle = Math.PI / 3;
+  const side = Math.sqrt(3) * radius * Math.cos(Math.PI / 6);
+  const offsetY = radius * (Math.sqrt(3) / 2);
+
+  canvas.width =window.innerWidth;// (cols-1)*side; // window.innerWidth;
+  canvas.height = window.innerHeight;//rows * offsetY * 2; // window.innerHeight;
+  canvas.offset=0;
+}
+
+function bindListeners() {
+  // Get canvas element and context
+  var canvas = $("#canvas")[0];
+
+  // Handle click event on canvas
+  $("#canvas").click(function (e) {
+    var ctx = $("#canvas")[0].getContext("2d");
+
+    // Get canvas coordinates
+    var canvasOffset = $("#canvas").offset();
+    var offsetX = canvasOffset.left;
+    var offsetY = canvasOffset.top;
+
+    // Calculate scale factor to normalize coordinates
+    var scaleFactor = canvas.width / canvas.offsetWidth;
+
+    // Get click coordinates
+    var x = Math.round((e.clientX - offsetX) * scaleFactor);
+    var y = Math.round((e.clientY - offsetY) * scaleFactor);
+
+    // Log normalized coordinates
+    console.log("Normalized coordinates: (" + x + ", " + y + ")");
+  });
 }

@@ -1,0 +1,22 @@
+@charset "UTF-8";
+.hex {
+  float: left;
+  margin-right: -26px;
+  margin-bottom: -50px;
+}
+
+.hex:after {
+  content: "⬣";
+  font-size: 100px;
+}
+
+.hex-row {
+  clear: left;
+  display: grid;
+  width: 375px;
+  grid-template-rows: auto auto; /* Define 3 rows */
+  grid-template-columns: 1fr 1fr 1fr 1fr; /* Define 4 columns */
+}
+.hex-row > *:nth-child(even) {
+  margin-top: 53px;
+}/*# sourceMappingURL=style2.css.map */
