@@ -7,7 +7,10 @@ const ctx = $("#canvas")[0].getContext("2d");
 
 const angle = Math.PI / 3;
 const side = Math.sqrt(3) * radius * Math.cos(Math.PI / 6);
-const offsetY = radius * (Math.sqrt(3) / 2);
+const offsetY = (0.5+radius) * (Math.sqrt(3) / 2);    // the height difference of odd-numbered cells
+
+const startingX=-0.5;   // grid starts from centerX of first hex. zero value means start from top
+const startingY = 0 // grid starts from left corner of first hex. zero value means start from centerY
 
 $(function () {
   normalizeCanvas();
@@ -22,7 +25,7 @@ function drawHexGrid() {
     const centerYOdd = centerYEven + offsetY;
 
     for (let j = 0; j < cols; j++) {
-      const centerX = side * (0.7 + j); // + j * side - side*0.3;
+      const centerX = side * (0.7 + j +startingX); 
       if (j % 2 === 0) {
         // zero or even
         drawHex(centerX, centerYEven);
@@ -45,7 +48,10 @@ function drawHexGrid() {
     }
     ctx.closePath();
     ctx.stroke();
-    ctx.fillText(`1`, x, y);
+
+    ctx.fillStyle="red";
+    ctx.fill()
+   // ctx.fillText(`1`, x, y);
   }
 }
 
@@ -58,7 +64,8 @@ function normalizeCanvas() {
 function bindListeners() {
   // Handle click event on canvas
   $(canvas).click(function (e) {
-    getClickedTile(e);
+   const tile= getClickedTile(e);
+   console.log(tile);
   });
 }
 
@@ -75,21 +82,25 @@ function getClickedTile(e) {
   const clickedX = Math.round((e.clientX - offsetX) * scaleFactor);
   const clickedY = Math.round((e.clientY - offsetY) * scaleFactor);
 
-  console.log(e.clientX, e.clientY);
-
   // because of hex shape we can only have an approximation of the cell, so we also get the neighboring cells
   const possibleCenters = findPossibleCenters(clickedX, clickedY);
 
+  // we only keep the cells withing the borders of the grid
+  const cellsWithinRange = possibleCenters.filter(obj=>obj.euclidean<radius)
+
   // target cell has the least euclidean distance
-  const targetCell = possibleCenters.reduce((min, current) =>
-    min.euclidean < current.euclidean ? min : current
+  const targetCell = cellsWithinRange.reduce((min, current) =>
+    min.euclidean < current.euclidean ? min : current,{x:-1,y:-1}
   );
-  console.log(targetCell);
+  delete targetCell.euclidean;
+ // console.log(targetCell.x,targetCell.y);
+  return targetCell;
+  
 }
 
 function findPossibleCenters(x, y) {
 
-  const mapX = Math.round((x - side * 0.7) / side);
+  const mapX = Math.round((x - side * (0.7+startingX)) / side);
   const mapY = Math.floor(y / (2 * offsetY));
 
   //   console.log(mapX, mapY);
@@ -100,10 +111,10 @@ function findPossibleCenters(x, y) {
   for (let i = iMin; i < iMax; i++) {
     for (let j = jMin; j < jMax; j++) {
       const epicenter = {
-        centerX: i,
-        centerY: j,
+        x: i,
+        y: j,
       };
-      const coordX = side * (0.7 + i);
+      const coordX = side * (0.7 + i +startingX);
       const coordY =
         i % 2 === 0
           ? Math.floor(j * offsetY * 2)
