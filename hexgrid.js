@@ -9,19 +9,21 @@ class HexGrid {
     this.side = Math.sqrt(3) * this.radius * Math.cos(Math.PI / 6);
     this.offsetY = (0.5 + this.radius) * (Math.sqrt(3) / 2); // the height difference of odd-numbered cells
     this.startingX =startCenterX? 0:-0.5; // grid starts from centerX of first hex. zero value means start from top
-    this.startingY = startCenterY ?  this.offsetY:0 ; // grid starts from left corner of first hex. zero value means start from centerY
-    // TODO FIX STARTINGY RENDER AND GET TILE
+    this.startingY = startCenterY ? this.offsetY : 0; // grid starts from left corner of first hex. zero value means start from centerY
+
     // TODO CHECK CANVAS SIZE FOR DIFFERENT STARTING X-Y
 
-    this.normalizeCanvas(adaptTogrid);
+    this.normalizeCanvas(startCenterX,startCenterY,adaptTogrid);
 
     console.log(`HexGrid attached to ${$(el).attr("id")}`);
     console.log(`rows:${this.rows}, columns:${this.columns}, radius:${this.radius}`);
   }
 
-  normalizeCanvas(adaptTogrid) {
-    this.canvas.width = adaptTogrid ? (this.columns - 1) * this.side : window.innerWidth;
-    this.canvas.height = adaptTogrid ? (this.rows - 0.5) * this.offsetY * 2 : window.innerHeight;
+  normalizeCanvas(startCenterX,startCenterY,adaptTogrid) {
+    const canvasWidth = startCenterX?(this.columns +0.4) * this.side :(this.columns -1) * this.side
+    const canvasHeight=startCenterY?(this.rows + 0.5) * this.offsetY * 2 :(this.rows -0.5) * this.offsetY * 2
+    this.canvas.width = adaptTogrid ? canvasWidth: window.innerWidth;
+    this.canvas.height = adaptTogrid ? canvasHeight: window.innerHeight;
     this.canvas.offset = 0;
   }
 
@@ -111,7 +113,7 @@ class HexGrid {
           y: j,
         };
         const coordX = this.side * (0.7 + i + this.startingX);
-        const coordY = i % 2 === 0 ? Math.floor(j * this.offsetY * 2) : Math.floor(j * this.offsetY * 2 + this.offsetY);
+        const coordY = i % 2 === 0 ? Math.floor(j * this.offsetY * 2+this.startingY) : Math.floor((j+1) * 2 + this.offsetY+this.startingY);
 
         const sum = Math.pow(x - coordX, 2) + Math.pow(y - coordY, 2);
         epicenter.euclidean = Math.sqrt(sum);
