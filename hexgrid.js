@@ -8,8 +8,8 @@ class HexGrid {
     this.angle = Math.PI / 3;
     this.side = Math.sqrt(3) * this.radius * Math.cos(Math.PI / 6);
     this.offsetY = (0.5 + this.radius) * (Math.sqrt(3) / 2); // the height difference of odd-numbered cells
-    this.startingX =startCenterX? -0.5:0; // grid starts from centerX of first hex. zero value means start from top
-    this.startingY = startCenterY ? 0 : this.offsetY; // grid starts from left corner of first hex. zero value means start from centerY
+    this.startingX =startCenterX? 0:-0.5; // grid starts from centerX of first hex. zero value means start from top
+    this.startingY = startCenterY ?  this.offsetY:0 ; // grid starts from left corner of first hex. zero value means start from centerY
     // TODO FIX STARTINGY RENDER AND GET TILE
     // TODO CHECK CANVAS SIZE FOR DIFFERENT STARTING X-Y
 
@@ -44,9 +44,9 @@ class HexGrid {
 
   // draws one single hex around the center
   drawHex(x = 0, y = 0, fill = "transparent", line = "black") {
-    const centerYEven = y * this.offsetY * 2;
+    const centerYEven = y * this.offsetY * 2+this.startingY;
     const centerYOdd = centerYEven + this.offsetY;
-    const centerY = x % 2 === 0 ? centerYEven : centerYOdd;
+    const centerY = x % 2 === 0 ? centerYEven: centerYOdd
     const centerX = this.side * (0.7 + x + this.startingX);
     const fillColor = fill;
     const lineColor = line;
@@ -62,7 +62,6 @@ class HexGrid {
     this.ctx.closePath();
     this.ctx.strokeStyle = `${lineColor}`;
     this.ctx.stroke();
-
     this.ctx.fillStyle = `${fillColor}`;
     this.ctx.fill();
   }

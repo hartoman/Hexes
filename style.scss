@@ -9,6 +9,8 @@ html {
   position: relative;
   display: block;
   background-color: green;
+  // if we set width and height, the div around the canvas will get scroll bars
+
  // width:50vw;
  // height: 50vh;
 //  overflow: auto;
@@ -17,9 +19,10 @@ html {
 canvas {
   padding: 0;
   margin: 0;
-  //display: block;
+  display: block;
   position: absolute;
   top: 0;
   left: 0;
-    // background-color: blue;
+  // canvas is transparent by default
+  // background-color: blue;
 }
