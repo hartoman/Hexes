@@ -2,50 +2,55 @@ body,
 html {
   width: 100%;
   height: 100%;
-   background-color: brown;
+  background-color: brown;
+}
+
+.container {
+  position: relative;
+  display: block;
+  background-color: green;
 }
 
 canvas {
   padding: 0;
   margin: 0;
-  position: relative;
+  display: block;
+ // position: absolute;
   top: 0;
   left: 0;
-  background-color: white;
+  // background-color: blue;
 }
 
-
-
-
-.hexgrid{
-    background-color: black;
+.hexgrid {
+  background-color: black;
 }
 
 .hex:before {
-    content: " ";
-    width: 0; height: 0;
-    border-bottom: 30px solid #6C6;
-    border-left: 52px solid transparent;
-    border-right: 52px solid transparent;
-    position: absolute;
-    top: -29px;
+  content: " ";
+  width: 0;
+  height: 0;
+  border-bottom: 30px solid #6c6;
+  border-left: 52px solid transparent;
+  border-right: 52px solid transparent;
+  position: absolute;
+  top: -29px;
 }
 
 .hex {
-    margin-top: 30px;
-    width: 104px;
-    height: 60px;
-    background-color: #6C6;
-    position: relative;
-    display:inline-block ;
+  margin-top: 30px;
+  width: 104px;
+  height: 60px;
+  background-color: #6c6;
+  position: relative;
+  display: inline-block;
 }
 
 .hex:after {
-    content: "";
-    width: 0;
-    position: absolute;
-    bottom: -29px;
-    border-top: 30px solid #6C6;
-    border-left: 52px solid transparent;
-    border-right: 52px solid transparent;
+  content: "";
+  width: 0;
+  position: absolute;
+  bottom: -29px;
+  border-top: 30px solid #6c6;
+  border-left: 52px solid transparent;
+  border-right: 52px solid transparent;
 }
