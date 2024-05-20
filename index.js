@@ -1,17 +1,25 @@
-import HexGrid from './hexgrid.js'
+import HexGrid from "./hexgrid.js";
 
 $(function () {
-    initCanvas()
-    bindListeners();
-  });
+  let hex1;
+  initCanvas();
+  bindListeners();
+  useCanvas();
 
-  function bindListeners(){
-
+  function initCanvas() {
+    hex1 = new HexGrid("#canvas1", { rows: 11, columns: 11, radius: 20, adaptTogrid: false, startCenterX: false });
   }
 
-function initCanvas() {
-  const hex = new HexGrid('#canvas', { rows: 10, columns: 10, radius: 20,adaptTogrid:true })
-  const tiles = hex.createGrid('transparent','black')
-  hex.drawHexes(tiles)
-  hex.drawHexes([{x:5,y:5,fill:"red",line:'blue'}])
+  function bindListeners() {
+    $("#canvas1").on("click", (e) => {
+      const clicked = hex1.getClickedTile(e);
+      console.log(clicked);
+    });
   }
+
+  function useCanvas() {
+    const tiles = hex1.createGrid("white", "black");
+    hex1.drawHexes(tiles);
+    hex1.drawHexes([{ x: 5, y: 5, fill: "red", line: "blue" }]);
+  }
+});

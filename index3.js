@@ -96,6 +96,35 @@ function getClickedTile(e) {
  // console.log(targetCell.x,targetCell.y);
   return targetCell;
   
+  function findPossibleCenters(x, y) {
+
+    const mapX = Math.round((x - side * (0.7+startingX)) / side);
+    const mapY = Math.floor(y / (2 * offsetY));
+  
+    //   console.log(mapX, mapY);
+    const euclideanArray = [];
+    const [iMin, iMax] = [Math.max(mapX - 1, 0), Math.min(mapX + 2, cols)];
+    const [jMin, jMax] = [Math.max(mapY - 1, 0), Math.min(mapY + 2, rows)];
+  
+    for (let i = iMin; i < iMax; i++) {
+      for (let j = jMin; j < jMax; j++) {
+        const epicenter = {
+          x: i,
+          y: j,
+        };
+        const coordX = side * (0.7 + i +startingX);
+        const coordY =
+          i % 2 === 0
+            ? Math.floor(j * offsetY * 2)
+            : Math.floor(j * offsetY * 2 + offsetY);
+  
+        const sum = Math.pow(x - coordX, 2) + Math.pow(y - coordY, 2);
+        epicenter.euclidean = Math.sqrt(sum);
+        euclideanArray.push(epicenter);
+      }
+    }
+    return euclideanArray;
+  }
 }
 
 function findPossibleCenters(x, y) {
