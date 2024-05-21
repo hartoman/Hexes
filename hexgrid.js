@@ -1,29 +1,34 @@
 class HexGrid {
-  constructor(el, { rows = 0, columns = 0, radius = 0, fitToGrid = false,startCenterX=false, startCenterY=false}) {
-    this.rows = rows;
-    this.columns = columns;
-    this.radius = radius;
+  constructor(
+    el,
+    { rows = 0, columns = 0, radius = 0, fitToGrid = false, startCenterX = false, startCenterY = false }
+  ) {
     this.canvas = $(el)[0];
     this.ctx = $(el)[0].getContext("2d");
+    this.rows = rows;
+    this.columns = columns;
+    this.circumradius = radius;
+    this.inradius = this.circumradius * (Math.sqrt(3) / 2); // the height difference of odd-numbered cells
+    this.edge = Math.sqrt(3) * this.circumradius * Math.cos(Math.PI / 6);
     this.angle = Math.PI / 3;
-    this.side = Math.sqrt(3) * this.radius * Math.cos(Math.PI / 6);
-    this.offsetY = (0.5 + this.radius) * (Math.sqrt(3) / 2); // the height difference of odd-numbered cells
-    this.startingX =startCenterX? 0:-0.5; // grid starts from centerX of first hex. zero value means start from top
-    this.startingY = startCenterY ? this.offsetY : 0; // grid starts from left corner of first hex. zero value means start from centerY
+    this.UNKNOWN = 0.75;
+    this.startingX = startCenterX ? 0 : this.circumradius; // grid starts from centerX of first hex. zero value means start from top
+    this.startingY = startCenterY ? 0:this.inradius ; // grid starts from left corner of first hex. zero value means start from centerY
 
     // TODO CHECK CANVAS SIZE FOR DIFFERENT STARTING X-Y
 
-    this.normalizeCanvas(startCenterX,startCenterY,fitToGrid);
+    this.#normalizeCanvas(startCenterX, startCenterY, fitToGrid);
 
     console.log(`HexGrid attached to ${$(el).attr("id")}`);
-    console.log(`rows:${this.rows}, columns:${this.columns}, radius:${this.radius}`);
+    console.log(`rows:${this.rows}, columns:${this.columns}, radius:${this.circumradius}`);
   }
 
-  normalizeCanvas(startCenterX,startCenterY,adaptTogrid) {
-    const canvasWidth = startCenterX?(this.columns +0.4) * this.side :(this.columns -1) * this.side
-    const canvasHeight=startCenterY?(this.rows + 0.5) * this.offsetY * 2 :(this.rows -0.5) * this.offsetY * 2
-    this.canvas.width = adaptTogrid ? canvasWidth: window.innerWidth;
-    this.canvas.height = adaptTogrid ? canvasHeight: window.innerHeight;
+  // TODO WHAT ARE THESE 0.4 0.5
+  #normalizeCanvas(startCenterX, startCenterY, adaptTogrid) {
+    const canvasWidth = startCenterX ? (this.columns + 0.4) * this.edge : (this.columns - 1) * this.edge;
+    const canvasHeight = startCenterY ? (this.rows + 0.5) * this.inradius * 2 : (this.rows - 0.5) * this.inradius * 2;
+    this.canvas.width = adaptTogrid ? canvasWidth : window.innerWidth;
+    this.canvas.height = adaptTogrid ? canvasHeight : window.innerHeight;
     this.canvas.offset = 0;
   }
 
@@ -40,25 +45,25 @@ class HexGrid {
 
   drawHexes(hexes = []) {
     hexes.map((hex) => {
-      this.drawHex(hex.x, hex.y, hex.fill, hex.line);
+      this.#drawHex(hex.x, hex.y, hex.fill, hex.line);
     });
   }
 
   // draws one single hex around the center
-  drawHex(x = 0, y = 0, fill = "transparent", line = "black") {
-    const centerYEven = y * this.offsetY * 2+this.startingY;
-    const centerYOdd = centerYEven + this.offsetY;
-    const centerY = x % 2 === 0 ? centerYEven: centerYOdd
-    const centerX = this.side * (0.7 + x + this.startingX);
+  #drawHex(x = 0, y = 0, fill = "transparent", line = "black") {
+    const centerYEven = y * this.inradius * 2 + this.startingY;
+    const centerYOdd = centerYEven + this.inradius;
+    const centerY = x % 2 === 0 ? centerYEven : centerYOdd;
+    const centerX = this.edge * x + this.startingX;
     const fillColor = fill;
     const lineColor = line;
 
     this.ctx.beginPath();
-    this.ctx.moveTo(centerX + this.radius, centerY);
+    this.ctx.moveTo(centerX + this.circumradius, centerY);
 
     for (let i = 0; i < 6; i++) {
-      let xx = centerX + this.radius * Math.cos(this.angle * i);
-      let yy = centerY + this.radius * Math.sin(this.angle * i);
+      let xx = centerX + this.circumradius * Math.cos(this.angle * i);
+      let yy = centerY + this.circumradius * Math.sin(this.angle * i);
       this.ctx.lineTo(xx, yy);
     }
     this.ctx.closePath();
@@ -83,10 +88,10 @@ class HexGrid {
     const clickedY = Math.round((e.clientY - offsetY) * scaleFactorY);
 
     // because of hex shape we can only have an approximation of the cell, so we also get the neighboring cells
-    const possibleCenters = this.findPossibleCenters(clickedX, clickedY);
+    const possibleCenters = this.#findPossibleCenters(clickedX, clickedY);
 
     // we only keep the cells withing the borders of the grid
-    const cellsWithinRange = possibleCenters.filter((obj) => obj.euclidean < this.radius);
+    const cellsWithinRange = possibleCenters.filter((obj) => obj.euclidean < this.circumradius);
 
     // target cell has the least euclidean distance
     const targetCell = cellsWithinRange.reduce((min, current) => (min.euclidean < current.euclidean ? min : current), {
@@ -98,10 +103,10 @@ class HexGrid {
     return targetCell;
   }
 
-  findPossibleCenters(x, y) {
-    const mapX = Math.round((x - this.side * (0.7 + this.startingX)) / this.side);
-    const mapY = Math.floor(y / (2 * this.offsetY))
-    
+  #findPossibleCenters(x, y) {
+    const mapX = Math.round((x - this.edge * (this.UNKNOWN + this.startingX)) / this.edge);
+    const mapY = Math.floor(y / (2 * this.inradius));
+
     //   console.log( mapY);
     const euclideanArray = [];
     const [iMin, iMax] = [Math.max(mapX - 1, 0), Math.min(mapX + 2, this.columns)];
@@ -113,15 +118,18 @@ class HexGrid {
           x: i,
           y: j,
         };
-        const coordX = this.side * (0.7 + i + this.startingX);
-        const coordY = i % 2 === 0 ? Math.floor(j * this.offsetY * 2) +this.startingY: Math.floor(j * this.offsetY * 2)+this.offsetY +this.startingY;
+        const coordX = this.edge * (this.UNKNOWN + i + this.startingX);
+        const coordY =
+          i % 2 === 0
+            ? Math.floor(j * this.inradius * 2) + this.startingY
+            : Math.floor(j * this.inradius * 2) + this.inradius + this.startingY;
 
         const sum = Math.pow(x - coordX, 2) + Math.pow(y - coordY, 2);
         epicenter.euclidean = Math.sqrt(sum);
         euclideanArray.push(epicenter);
       }
     }
-  //  console.log(euclideanArray)
+    console.log(euclideanArray);
     return euclideanArray;
   }
 }
