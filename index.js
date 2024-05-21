@@ -9,7 +9,7 @@ $(function () {
 
   
   function initCanvas() {
-    hex1 = new HexGrid("#canvas1", { rows: 100, columns: 100, radius: 10, adaptTogrid: true ,startCenterX:true,startCenterY:true});
+    hex1 = new HexGrid("#canvas1", { rows: 10, columns: 3, radius: 20, fitToGrid: true ,startCenterX:true,startCenterY:true});
   }
 
   function bindListeners() {
@@ -22,7 +22,7 @@ $(function () {
   function useCanvas() {
     const tiles = hex1.createGrid("white", "black");
     hex1.drawHexes(tiles);
-    hex1.drawHexes([{ x: 5, y: 5, fill: "red", line: "blue" }]);
+    hex1.drawHexes([{ x: 0, y: 8, fill: "red", line: "blue" }]);
   }
 });
 

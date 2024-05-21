@@ -1,5 +1,5 @@
 class HexGrid {
-  constructor(el, { rows = 0, columns = 0, radius = 0, adaptTogrid = false,startCenterX=false, startCenterY=false}) {
+  constructor(el, { rows = 0, columns = 0, radius = 0, fitToGrid = false,startCenterX=false, startCenterY=false}) {
     this.rows = rows;
     this.columns = columns;
     this.radius = radius;
@@ -13,7 +13,7 @@ class HexGrid {
 
     // TODO CHECK CANVAS SIZE FOR DIFFERENT STARTING X-Y
 
-    this.normalizeCanvas(startCenterX,startCenterY,adaptTogrid);
+    this.normalizeCanvas(startCenterX,startCenterY,fitToGrid);
 
     console.log(`HexGrid attached to ${$(el).attr("id")}`);
     console.log(`rows:${this.rows}, columns:${this.columns}, radius:${this.radius}`);
@@ -75,11 +75,12 @@ class HexGrid {
     const offsetY = canvasOffset.top;
 
     // Calculate scale factor to normalize coordinates
-    const scaleFactor = this.canvas.width / this.canvas.offsetWidth;
+    const scaleFactorX = this.canvas.width / this.canvas.offsetWidth;
+    const scaleFactorY = this.canvas.height / this.canvas.offsetHeight;
 
     // Get click coordinates
-    const clickedX = Math.round((e.clientX - offsetX) * scaleFactor);
-    const clickedY = Math.round((e.clientY - offsetY) * scaleFactor);
+    const clickedX = Math.round((e.clientX - offsetX) * scaleFactorX);
+    const clickedY = Math.round((e.clientY - offsetY) * scaleFactorY);
 
     // because of hex shape we can only have an approximation of the cell, so we also get the neighboring cells
     const possibleCenters = this.findPossibleCenters(clickedX, clickedY);
@@ -99,9 +100,9 @@ class HexGrid {
 
   findPossibleCenters(x, y) {
     const mapX = Math.round((x - this.side * (0.7 + this.startingX)) / this.side);
-    const mapY = Math.floor(y / (2 * this.offsetY));
-
-    //   console.log(mapX, mapY);
+    const mapY = Math.floor(y / (2 * this.offsetY))
+    
+    //   console.log( mapY);
     const euclideanArray = [];
     const [iMin, iMax] = [Math.max(mapX - 1, 0), Math.min(mapX + 2, this.columns)];
     const [jMin, jMax] = [Math.max(mapY - 1, 0), Math.min(mapY + 2, this.rows)];
@@ -113,13 +114,14 @@ class HexGrid {
           y: j,
         };
         const coordX = this.side * (0.7 + i + this.startingX);
-        const coordY = i % 2 === 0 ? Math.floor(j * this.offsetY * 2+this.startingY) : Math.floor((j+1) * 2 + this.offsetY+this.startingY);
+        const coordY = i % 2 === 0 ? Math.floor(j * this.offsetY * 2) +this.startingY: Math.floor(j * this.offsetY * 2)+this.offsetY +this.startingY;
 
         const sum = Math.pow(x - coordX, 2) + Math.pow(y - coordY, 2);
         epicenter.euclidean = Math.sqrt(sum);
         euclideanArray.push(epicenter);
       }
     }
+  //  console.log(euclideanArray)
     return euclideanArray;
   }
 }
