@@ -1,5 +1,5 @@
 class HexGrid {
-  constructor (
+  constructor(
     el,
     { rows = 0, columns = 0, radius = 0, fitToGrid = false, startCenterX = false, startCenterY = false }
   ) {
@@ -17,18 +17,18 @@ class HexGrid {
 
     // TODO CHECK CANVAS SIZE FOR DIFFERENT STARTING X-Y outside screen
 
-    this.#normalizeCanvas(startCenterX, startCenterY, fitToGrid);
+    this.#normalizeCanvas(fitToGrid);
 
     console.log(`HexGrid attached to ${$(el).attr("id")}`);
     console.log(`rows:${this.rows}, columns:${this.columns}, radius:${this.circumradius}`);
   }
 
-  // TODO WHAT ARE THESE 0.4 0.5
-  #normalizeCanvas(startCenterX, startCenterY, adaptTogrid) {
-    const canvasWidth = startCenterX ? (this.columns + 0.4) * this.edge +this.startingX : (this.columns - 1) * this.edge+this.startingX*2 ;
-    const canvasHeight = startCenterY ? (this.rows + 0.5) * this.apothem * 2 +this.startingY: (this.rows - 0.5) * this.apothem * 2+this.startingY*2;
-    this.canvas.width = adaptTogrid ? canvasWidth : window.innerWidth;
-    this.canvas.height = adaptTogrid ? canvasHeight : window.innerHeight;
+
+  #normalizeCanvas(fitToGrid) {
+    const canvasWidth = this.columns * this.edge -(this.edge-2* this.startingX)
+    const canvasHeight = this.rows * this.apothem * 2 - (this.apothem-2*this.startingY);
+    this.canvas.width = fitToGrid ? canvasWidth : window.innerWidth;
+    this.canvas.height = fitToGrid ? canvasHeight : window.innerHeight;
     this.canvas.offset = 0;
   }
 
@@ -44,7 +44,7 @@ class HexGrid {
   }
 
   drawHexes(hexes = []) {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     hexes.map((hex) => {
       this.#drawHex(hex.x, hex.y, hex.fill, hex.line);
     });
@@ -95,40 +95,39 @@ class HexGrid {
     const cellsWithinRange = possibleCenters.filter((obj) => obj.euclidean < this.circumradius);
 
     // target cell has the least euclidean distance
-    const targetCell = cellsWithinRange.reduce(
-      (min, current) => (min.euclidean < current.euclidean ? min : current),
-      {
-        x: -1,
-        y: -1,
-      }
-    );
+    const targetCell = cellsWithinRange.reduce((min, current) => (min.euclidean < current.euclidean ? min : current), {
+      x: -1,
+      y: -1,
+    });
 
     // only one cell left, handle edge cases
-    if (targetCell.x === 0 || targetCell.x === this.columns-1 ||
-      targetCell.y === 0 || targetCell.y === this.rows-1 
+    if (
+      targetCell.x === 0 ||
+      targetCell.x === this.columns - 1 ||
+      targetCell.y === 0 ||
+      targetCell.y === this.rows - 1
     ) {
       if (!this.#isInsideHex(targetCell.x, targetCell.y, clickedX, clickedY)) {
-        targetCell.x = -1
-        targetCell.y=-1
+        targetCell.x = -1;
+        targetCell.y = -1;
       }
-      
     }
     delete targetCell.euclidean;
     return targetCell;
   }
-  
+
   #isInsideHex(centerX, centerY, clickX, clickY) {
     this.#drawHex(centerX, centerY, "transparent", "transparent");
     // Check if the point is within the hexagon
     if (this.ctx.isPointInPath(clickX, clickY)) {
-    //  console.log("Clicked point is within the hexagon.");
+      //  console.log("Clicked point is within the hexagon.");
       return true;
     } else {
-     // console.log("Clicked point is outside the hexagon.");
+      // console.log("Clicked point is outside the hexagon.");
       return false;
     }
   }
-  
+
   // gets all possible centers from neighboring cells
   #findPossibleCenters(x, y) {
     const mapX = Math.floor(x / (2 * this.circumradius));
