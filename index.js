@@ -9,7 +9,7 @@ $(function () {
 
   
   function initCanvas() {
-    hex1 = new HexGrid("#canvas1", { rows: 4, columns: 4, radius: 100, fitToGrid: false ,startCenterX:false,startCenterY:false});
+    hex1 = new HexGrid("#canvas1", { rows: 4, columns: 4, radius: 50, fitToGrid: false ,startCenterX:false,startCenterY:false});
   }
 
   function bindListeners() {

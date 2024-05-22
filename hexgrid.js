@@ -1,5 +1,5 @@
 class HexGrid {
-  constructor(
+  constructor (
     el,
     { rows = 0, columns = 0, radius = 0, fitToGrid = false, startCenterX = false, startCenterY = false }
   ) {
@@ -90,30 +90,49 @@ class HexGrid {
     // because of hex shape we can only have an approximation of the cell, so we also get the neighboring cells
     const possibleCenters = this.#findPossibleCenters(clickedX, clickedY);
 
-    // we only keep the cells withing the borders of the grid
-    const cellsWithinRange = possibleCenters.filter((obj) => obj.euclidean < this.circumradius*1.2);
+    // we only keep the immediate neighbors (exactly double the circumradius)
+    const cellsWithinRange = possibleCenters.filter((obj) => obj.euclidean < this.circumradius);
 
-    const cellsCloserThanRadius = (cellsWithinRange.length===1) &&(cellsWithinRange[0].euclidean>this.apothem)
-
-    if (cellsCloserThanRadius) {
-      cellsWithinRange.pop()
-    }
-
-    console.log(cellsWithinRange)
     // target cell has the least euclidean distance
-    const targetCell = cellsWithinRange.reduce((min, current) => (min.euclidean < current.euclidean ? min : current), {
-      x: -1,
-      y: -1,
-    });
+    const targetCell = cellsWithinRange.reduce(
+      (min, current) => (min.euclidean < current.euclidean ? min : current),
+      {
+        x: -1,
+        y: -1,
+      }
+    );
+
+    // only one cell left, handle edge cases
+    if (targetCell.x === 0 || targetCell.x === this.columns-1 ||
+      targetCell.y === 0 || targetCell.y === this.rows-1 
+    ) {
+      if (!this.#isInsideHex(targetCell.x, targetCell.y, clickedX, clickedY)) {
+        targetCell.x = -1
+        targetCell.y=-1
+      }
+      
+    }
     delete targetCell.euclidean;
     return targetCell;
   }
-
+  
+  #isInsideHex(centerX, centerY, clickX, clickY) {
+    this.#drawHex(centerX, centerY, "transparent", "transparent");
+    // Check if the point is within the hexagon
+    if (this.ctx.isPointInPath(clickX, clickY)) {
+    //  console.log("Clicked point is within the hexagon.");
+      return true;
+    } else {
+     // console.log("Clicked point is outside the hexagon.");
+      return false;
+    }
+  }
+  
   // gets all possible centers from neighboring cells
   #findPossibleCenters(x, y) {
     const mapX = Math.floor(x / (2 * this.circumradius));
-    const mapY = Math.floor( y / ((2*this.apothem)));
-    console.log(mapX,mapY)
+    const mapY = Math.floor(y / (2 * this.apothem));
+
     const euclideanArray = [];
     const [iMin, iMax] = [Math.max(mapX - 1, 0), Math.min(mapX + 2, this.columns)];
     const [jMin, jMax] = [Math.max(mapY - 1, 0), Math.min(mapY + 2, this.rows)];
@@ -137,9 +156,8 @@ class HexGrid {
         euclideanArray.push(epicenter);
       }
     }
-  //  console.log(euclideanArray)
+    //  console.log(euclideanArray)
     return euclideanArray;
   }
 }
-
 export default HexGrid;
