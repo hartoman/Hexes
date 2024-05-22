@@ -19,10 +19,15 @@ html {
 canvas {
   padding: 0;
   margin: 0;
-  display: block;
   position: absolute;
   top: 0;
   left: 0;
-  // canvas is transparent by default
-   background-color: blue;
 }
+
+.canvas-foreground{
+  background-color: transparent; 
+ }
+
+ .canvas-background{
+  background-color: blue; 
+ }

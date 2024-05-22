@@ -15,7 +15,7 @@ class HexGrid {
     this.startingX = startCenterX ? 0 : this.circumradius; // grid starts from centerX of first hex. zero value means start from top
     this.startingY = startCenterY ? 0 : this.apothem; // grid starts from left corner of first hex. zero value means start from centerY
 
-    // TODO CHECK CANVAS SIZE FOR DIFFERENT STARTING X-Y
+    // TODO CHECK CANVAS SIZE FOR DIFFERENT STARTING X-Y outside screen
 
     this.#normalizeCanvas(startCenterX, startCenterY, fitToGrid);
 
@@ -25,8 +25,8 @@ class HexGrid {
 
   // TODO WHAT ARE THESE 0.4 0.5
   #normalizeCanvas(startCenterX, startCenterY, adaptTogrid) {
-    const canvasWidth = startCenterX ? (this.columns + 0.4) * this.edge : (this.columns - 1) * this.edge;
-    const canvasHeight = startCenterY ? (this.rows + 0.5) * this.apothem * 2 : (this.rows - 0.5) * this.apothem * 2;
+    const canvasWidth = startCenterX ? (this.columns + 0.4) * this.edge +this.startingX : (this.columns - 1) * this.edge+this.startingX*2 ;
+    const canvasHeight = startCenterY ? (this.rows + 0.5) * this.apothem * 2 +this.startingY: (this.rows - 0.5) * this.apothem * 2+this.startingY*2;
     this.canvas.width = adaptTogrid ? canvasWidth : window.innerWidth;
     this.canvas.height = adaptTogrid ? canvasHeight : window.innerHeight;
     this.canvas.offset = 0;
@@ -44,6 +44,7 @@ class HexGrid {
   }
 
   drawHexes(hexes = []) {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     hexes.map((hex) => {
       this.#drawHex(hex.x, hex.y, hex.fill, hex.line);
     });
