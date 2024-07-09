@@ -10,14 +10,15 @@ $(function () {
 
   
   function initCanvas() {
-    backgroundCanvas = new HexGrid("#canvas1", { rows: 4, columns: 4, radius: 20, fitToGrid: true, startCenterX: false, startCenterY: false });
-    foregroundCanvas = new HexGrid("#canvas2", { rows: 4, columns: 4, radius: 20, fitToGrid: true ,startCenterX:false,startCenterY:false});
+    backgroundCanvas = new HexGrid("#canvas1", { rows: 15, columns: 50, radius: 10, fitToGrid: true, startCenterX: false, startCenterY: false });
+    foregroundCanvas = new HexGrid("#canvas2", { rows: 15, columns: 50, radius: 10, fitToGrid: true ,startCenterX:false,startCenterY:false});
   }
 
   function bindListeners() {
     $('#canvas2').on("click", (e) => {
       const clicked = foregroundCanvas.getClickedTile(e)
       console.log(clicked)
+      foregroundCanvas.drawHexes([{ x: clicked.x, y: clicked.y, fill: "green", line: "black" }]);
     });
   }
 

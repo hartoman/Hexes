@@ -11,7 +11,7 @@ class HexGrid {
     this.apothem = this.circumradius * (Math.sqrt(3) / 2); // the height difference of odd-numbered cells
     this.edge = Math.sqrt(3) * this.circumradius * Math.cos(Math.PI / 6);
     this.angle = Math.PI / 3;
-    this.UNKNOWN = 0.75;
+    //this.UNKNOWN = 0.75;
     this.startingX = startCenterX ? 0 : this.circumradius; // grid starts from centerX of first hex. zero value means start from top
     this.startingY = startCenterY ? 0 : this.apothem; // grid starts from left corner of first hex. zero value means start from centerY
 
@@ -130,7 +130,7 @@ class HexGrid {
 
   // gets all possible centers from neighboring cells
   #findPossibleCenters(x, y) {
-    const mapX = Math.floor(x / (2 * this.circumradius));
+    const mapX = Math.floor(x / (1.5 * this.circumradius)); // it is no exactly divided by 2 because of the even-odd
     const mapY = Math.floor(y / (2 * this.apothem));
 
     const euclideanArray = [];
