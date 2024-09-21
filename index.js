@@ -10,8 +10,8 @@ $(function () {
 
   
   function initCanvas() {
-    backgroundCanvas = new HexGrid("#canvas1", { rows: 15, columns: 50, radius: 10, fitToGrid: true, startCenterX: false, startCenterY: false });
-    foregroundCanvas = new HexGrid("#canvas2", { rows: 15, columns: 50, radius: 10, fitToGrid: true ,startCenterX:false,startCenterY:false});
+    backgroundCanvas = new HexGrid("#canvas1", { rows: 25, columns: 25, radius: 10, fitToGrid: true, startCenterX: false, startCenterY: false });
+    foregroundCanvas = new HexGrid("#canvas2", { rows: 25, columns: 25, radius: 10, fitToGrid: true ,startCenterX:false,startCenterY:false});
   }
 
   function bindListeners() {

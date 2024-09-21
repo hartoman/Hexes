@@ -11,11 +11,8 @@ class HexGrid {
     this.apothem = this.circumradius * (Math.sqrt(3) / 2); // the height difference of odd-numbered cells
     this.edge = Math.sqrt(3) * this.circumradius * Math.cos(Math.PI / 6);
     this.angle = Math.PI / 3;
-    //this.UNKNOWN = 0.75;
     this.startingX = startCenterX ? 0 : this.circumradius; // grid starts from centerX of first hex. zero value means start from top
     this.startingY = startCenterY ? 0 : this.apothem; // grid starts from left corner of first hex. zero value means start from centerY
-
-    // TODO CHECK CANVAS SIZE FOR DIFFERENT STARTING X-Y outside screen
 
     this.#normalizeCanvas(fitToGrid);
 
@@ -73,6 +70,90 @@ class HexGrid {
     this.ctx.fillStyle = `${fillColor}`;
     this.ctx.fill();
   }
+
+  getClickedTile(e) {
+    // Get canvas coordinates
+    const canvasOffset = $(this.canvas).offset();
+    const offsetX = canvasOffset.left;
+    const offsetY = canvasOffset.top;
+
+    // Get click coordinates accounting for scrolling
+    const clickedX = Math.round(e.pageX - offsetX);
+    const clickedY = Math.round(e.pageY - offsetY);
+
+    // Calculate scale factor to normalize coordinates
+    const scaleFactorX = this.canvas.width / this.canvas.offsetWidth;
+    const scaleFactorY = this.canvas.height / this.canvas.offsetHeight;
+
+    // Normalizing the x and y coordinates to the canvas scale
+    const normalizedX = Math.round(clickedX * scaleFactorX);
+    const normalizedY = Math.round(clickedY * scaleFactorY);
+
+    // Find potential centers for hexagons surrounding the click
+    const possibleCenters = this.#findPossibleCenters(normalizedX, normalizedY);
+
+    // Filter to keep only those within the immediate neighbor range
+    const cellsWithinRange = possibleCenters.filter(obj => obj.euclidean < this.circumradius);
+
+    // Select the target cell with the smallest distance
+    const targetCell = cellsWithinRange.reduce((min, current) => 
+        (current.euclidean < min.euclidean ? current : min), 
+        { x: -1, y: -1, euclidean: Infinity }
+    );
+
+    // Check if the target cell is valid
+    if (targetCell.x >= 0 && targetCell.x < this.columns && targetCell.y >= 0 && targetCell.y < this.rows) {
+        if (!this.#isInsideHex(targetCell.x, targetCell.y, normalizedX, normalizedY)) {
+            return { x: -1, y: -1 }; // Return invalid cell
+        }
+    } else {
+        return { x: -1, y: -1 }; // Out of bounds return
+    }
+
+    delete targetCell.euclidean;
+    return targetCell;
+}
+
+#isInsideHex(centerX, centerY, clickX, clickY) {
+    this.#drawHex(centerX, centerY, "transparent", "transparent");
+    return this.ctx.isPointInPath(clickX, clickY);
+}
+
+#findPossibleCenters(x, y) {
+    const mapX = Math.floor(x / (1.5 * this.circumradius));
+    const mapY = Math.floor(y / (2 * this.apothem));
+
+    const euclideanArray = [];
+    const [iMin, iMax] = [Math.max(mapX - 1, 0), Math.min(mapX + 2, this.columns)];
+    const [jMin, jMax] = [Math.max(mapY - 1, 0), Math.min(mapY + 2, this.rows)];
+
+    for (let i = iMin; i < iMax; i++) {
+        for (let j = jMin; j < jMax; j++) {
+            const epicenter = {
+                x: i,
+                y: j,
+            };
+
+            const centerYEven = j * this.apothem * 2 + this.startingY;
+            const centerYOdd = centerYEven + this.apothem;
+            const coordY = i % 2 === 0 ? centerYEven : centerYOdd;
+            const coordX = this.edge * i + this.startingX;
+
+            // Calculate Euclidean distance
+            const sum = Math.pow(x - coordX, 2) + Math.pow(y - coordY, 2);
+            epicenter.euclidean = Math.sqrt(sum);
+            euclideanArray.push(epicenter);
+        }
+    }
+    return euclideanArray;
+}
+
+}
+export default HexGrid;
+
+
+/*
+ORIGINALS
 
   getClickedTile(e) {
     // Get canvas coordinates
@@ -159,5 +240,5 @@ class HexGrid {
     //  console.log(euclideanArray)
     return euclideanArray;
   }
-}
-export default HexGrid;
+
+*/
