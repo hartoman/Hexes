@@ -1,8 +1,10 @@
 import HexGrid from "./hexgrid.js";
-
+import { createMap } from "./mapgen.js";
 
 $(function () {
 
+  const MAP_ROWS = 50
+  const MAP_COLUMNS = 50;
   let backgroundCanvas;
   let foregroundCanvas;
  // preloadImages(["a.jpg"]);
@@ -14,8 +16,8 @@ $(function () {
 
   
   function initCanvas() {
-    backgroundCanvas = new HexGrid("#canvas1", { rows: 15, columns: 10, radius: 30, fitToGrid: true, startCenterX: false, startCenterY: false });
-    foregroundCanvas = new HexGrid("#canvas2", { rows: 15, columns: 10, radius: 30, fitToGrid: true ,startCenterX:false,startCenterY:false});
+    backgroundCanvas = new HexGrid("#canvas1", { rows: MAP_ROWS, columns: MAP_COLUMNS, radius: 10, fitToGrid: true, startCenterX: false, startCenterY: false });
+    foregroundCanvas = new HexGrid("#canvas2", { rows: MAP_ROWS, columns: MAP_COLUMNS, radius: 10, fitToGrid: true ,startCenterX:false,startCenterY:false});
   }
 
   function bindListeners() {
@@ -27,9 +29,18 @@ $(function () {
   }
 
   function useCanvas() {
-    const tiles = backgroundCanvas.createGrid("white", "transparent");
-    backgroundCanvas.drawImages(tiles)
-  //  backgroundCanvas.drawHexes(tiles);
+  
+    // images
+    // backgroundCanvas.drawImages(tiles)
+
+    // get basic layout from the hexgrid
+    //  const tiles = backgroundCanvas.createGrid("white", "transparent");
+
+    // get randomized color map
+    const tiles = createMap(15,7,MAP_ROWS,MAP_COLUMNS) 
+    backgroundCanvas.drawHexes(tiles);
+
+    // paint a specific tile
   //  foregroundCanvas.drawHexes([{ x: 0, y: 2, fill: "green", line: "black" }]);
 
   }
