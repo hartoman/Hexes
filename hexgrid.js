@@ -15,11 +15,11 @@ class HexGrid {
     this.startingY = startCenterY ? 0 : this.apothem; // grid starts from left corner of first hex. zero value means start from centerY
 
     this.#normalizeCanvas(fitToGrid);
+    this.imageCache = {};
 
     console.log(`HexGrid attached to ${$(el).attr("id")}`);
     console.log(`rows:${this.rows}, columns:${this.columns}, radius:${this.circumradius}`);
   }
-
 
   #normalizeCanvas(fitToGrid) {
     const canvasWidth = this.columns * this.edge -(this.edge-2* this.startingX)
@@ -33,7 +33,7 @@ class HexGrid {
     const tiles = [];
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.columns; j++) {
-        const tile = { x: j, y: i, fill: fillColor, line: lineColor };
+        const tile = { x: j, y: i, fill: fillColor, line: lineColor,type:'a.jpg' };
         tiles.push(tile);
       }
     }
@@ -70,6 +70,8 @@ class HexGrid {
     this.ctx.fillStyle = `${fillColor}`;
     this.ctx.fill();
   }
+
+
 
   getClickedTile(e) {
     // Get canvas coordinates
@@ -160,5 +162,90 @@ class HexGrid {
     //  console.log(euclideanArray)
     return euclideanArray;
   }
+
+  drawImages(hexes = []) {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Initialize a counter for loaded images
+    let imagesToLoad = 0;
+    const hexImagePromises = [];
+
+    hexes.forEach((hex) => {
+        const type = hex.type;
+
+        // Check if the image is already cached
+        if (!this.imageCache[type]) {
+            // If not cached, prepare to load it
+            imagesToLoad++;
+            const img = new Image();
+            img.src = type;
+
+            // Cache the image when it loads
+            const loadPromise = new Promise((resolve, reject) => {
+                img.onload = () => {
+                    this.imageCache[type] = img;
+                    resolve();
+                };
+                img.onerror = () => {
+                    console.error(`Failed to load image: ${type}`);
+                    reject(new Error(`Failed to load image: ${type}`));
+                };
+            });
+
+            hexImagePromises.push(loadPromise);
+        } else {
+            // Already cached, so no need to load again
+            hexImagePromises.push(Promise.resolve());
+        }
+    });
+
+    // Wait for all images to load
+    Promise.all(hexImagePromises)
+        .then(() => {
+            hexes.forEach((hex) => {
+                const type = hex.type;
+                const img = this.imageCache[type];
+                this.#drawImg(hex.x, hex.y, img, hex.line);
+            });
+        })
+        .catch((error) => {
+            console.error("Error loading images: ", error);
+        });
+}
+
+// Draws one single hex and the image within it
+#drawImg(x = 0, y = 0, image, line="black") {
+  const centerYEven = y * this.apothem * 2 + this.startingY;
+  const centerYOdd = centerYEven + this.apothem;
+  const centerY = x % 2 === 0 ? centerYEven : centerYOdd;
+  const centerX = this.edge * x + this.startingX;
+
+  this.ctx.beginPath();
+  this.ctx.moveTo(centerX + this.circumradius, centerY);
+
+  for (let i = 0; i < 6; i++) {
+      let xx = centerX + this.circumradius * Math.cos(this.angle * i);
+      let yy = centerY + this.circumradius * Math.sin(this.angle * i);
+      this.ctx.lineTo(xx, yy);
+  }
+  this.ctx.closePath();
+  
+  this.ctx.save(); // Save the current context state
+  this.ctx.clip(); // Clip the canvas to the hexagon before drawing image
+
+  // Draw the image inside the hexagon
+  if (image) {
+      this.ctx.drawImage(image, 
+          centerX - this.circumradius, 
+          centerY - this.apothem, 
+          this.circumradius * 2, 
+          this.apothem * 2
+      );
+  }
+
+  this.ctx.restore(); // Reset the context to the saved state
+  this.ctx.strokeStyle = line; // Default line color, can be parameterized if needed
+  this.ctx.stroke();
+}
 }
 export default HexGrid;
