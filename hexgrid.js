@@ -33,7 +33,7 @@ class HexGrid {
     const tiles = [];
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.columns; j++) {
-        const tile = { x: j, y: i, fill: fillColor, line: lineColor,type:'a.jpg' };
+        const tile = { x: j, y: i, fill: fillColor, line: lineColor,type:'sea' };
         tiles.push(tile);
       }
     }
@@ -166,19 +166,18 @@ class HexGrid {
   drawImages(hexes = []) {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Initialize a counter for loaded images
-    let imagesToLoad = 0;
     const hexImagePromises = [];
 
     hexes.forEach((hex) => {
         const type = hex.type;
+       const filename = `${type}.jpg`
 
         // Check if the image is already cached
         if (!this.imageCache[type]) {
             // If not cached, prepare to load it
-            imagesToLoad++;
+
             const img = new Image();
-            img.src = type;
+            img.src = filename;
 
             // Cache the image when it loads
             const loadPromise = new Promise((resolve, reject) => {
@@ -202,6 +201,7 @@ class HexGrid {
     // Wait for all images to load
     Promise.all(hexImagePromises)
         .then(() => {
+          console.log(this.imageCache)
             hexes.forEach((hex) => {
                 const type = hex.type;
                 const img = this.imageCache[type];
