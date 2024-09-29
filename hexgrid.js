@@ -11,11 +11,8 @@ class HexGrid {
     this.apothem = this.circumradius * (Math.sqrt(3) / 2); // the height difference of odd-numbered cells
     this.edge = Math.sqrt(3) * this.circumradius * Math.cos(Math.PI / 6);
     this.angle = Math.PI / 3;
-    //this.UNKNOWN = 0.75;
     this.startingX = startCenterX ? 0 : this.circumradius; // grid starts from centerX of first hex. zero value means start from top
     this.startingY = startCenterY ? 0 : this.apothem; // grid starts from left corner of first hex. zero value means start from centerY
-
-    // TODO CHECK CANVAS SIZE FOR DIFFERENT STARTING X-Y outside screen
 
     this.#normalizeCanvas(fitToGrid);
 
@@ -27,8 +24,8 @@ class HexGrid {
   #normalizeCanvas(fitToGrid) {
     const canvasWidth = this.columns * this.edge -(this.edge-2* this.startingX)
     const canvasHeight = this.rows * this.apothem * 2 - (this.apothem-2*this.startingY);
-    this.canvas.width = fitToGrid ? canvasWidth : window.innerWidth;
-    this.canvas.height = fitToGrid ? canvasHeight : window.innerHeight;
+    this.canvas.width = fitToGrid ? canvasWidth : 100
+    this.canvas.height = fitToGrid ? canvasHeight : 100;
     this.canvas.offset = 0;
   }
 
@@ -80,13 +77,17 @@ class HexGrid {
     const offsetX = canvasOffset.left;
     const offsetY = canvasOffset.top;
 
+    // Get current scroll position
+    const scrollX = window.scrollX || window.pageXOffset;
+    const scrollY = window.scrollY || window.pageYOffset;
+
     // Calculate scale factor to normalize coordinates
     const scaleFactorX = this.canvas.width / this.canvas.offsetWidth;
     const scaleFactorY = this.canvas.height / this.canvas.offsetHeight;
 
-    // Get click coordinates
-    const clickedX = Math.round((e.clientX - offsetX) * scaleFactorX);
-    const clickedY = Math.round((e.clientY - offsetY) * scaleFactorY);
+    // Get click coordinates adjusted for scrolling
+    const clickedX = Math.round((e.clientX - offsetX + scrollX) * scaleFactorX);
+    const clickedY = Math.round((e.clientY - offsetY + scrollY) * scaleFactorY);
 
     // because of hex shape we can only have an approximation of the cell, so we also get the neighboring cells
     const possibleCenters = this.#findPossibleCenters(clickedX, clickedY);
@@ -96,25 +97,25 @@ class HexGrid {
 
     // target cell has the least euclidean distance
     const targetCell = cellsWithinRange.reduce((min, current) => (min.euclidean < current.euclidean ? min : current), {
-      x: -1,
-      y: -1,
+        x: -1,
+        y: -1,
     });
 
     // only one cell left, handle edge cases
     if (
-      targetCell.x === 0 ||
-      targetCell.x === this.columns - 1 ||
-      targetCell.y === 0 ||
-      targetCell.y === this.rows - 1
+        targetCell.x === 0 ||
+        targetCell.x === this.columns - 1 ||
+        targetCell.y === 0 ||
+        targetCell.y === this.rows - 1
     ) {
-      if (!this.#isInsideHex(targetCell.x, targetCell.y, clickedX, clickedY)) {
-        targetCell.x = -1;
-        targetCell.y = -1;
-      }
+        if (!this.#isInsideHex(targetCell.x, targetCell.y, clickedX, clickedY)) {
+            targetCell.x = -1;
+            targetCell.y = -1;
+        }
     }
     delete targetCell.euclidean;
     return targetCell;
-  }
+}
 
   #isInsideHex(centerX, centerY, clickX, clickY) {
     this.#drawHex(centerX, centerY, "transparent", "transparent");

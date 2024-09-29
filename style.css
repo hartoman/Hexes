@@ -17,6 +17,8 @@ canvas {
   position: absolute;
   top: 0;
   left: 0;
+  width: 100px !important;
+  height: 100px !important;
 }
 
 .canvas-foreground {
