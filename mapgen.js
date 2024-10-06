@@ -1,4 +1,4 @@
-export const createMap = (maxPeaks, maximumElevation, rows, cols) => {
+export const createMap = (maxPeaks=1, maximumElevation=7, rows, cols) => {
     const tiles = createBasicTiles(rows, cols);
 
  //   const randomX = randomBetween(0, cols - 1); // Ensure it does not exceed cols-1
@@ -18,7 +18,7 @@ export const createMap = (maxPeaks, maximumElevation, rows, cols) => {
             if (i == 0) {
                 setElevation(maximumElevation, randomX, randomY);
             } else {
-                setElevation(randomBetween(maximumElevation/2, maximumElevation), randomX, randomY);
+                setElevation(randomBetween(2, maximumElevation), randomX, randomY);
             }
         }
 
@@ -29,6 +29,11 @@ export const createMap = (maxPeaks, maximumElevation, rows, cols) => {
     return tiles;
 
     function setElevation(maxElevation, x, y) {
+
+if(maxElevation<=0){
+    return;
+}
+
         // Ensure that x and y are within bounds
         if (x < 0 || x >= cols || y < 0 || y >= rows) {
             return;
@@ -72,7 +77,7 @@ function createBasicTiles(rows,cols){
     const tiles = [];
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
-        const tile = { x: j, y: i, elevation:0, fillColor:""};
+        const tile = { x: j, y: i, elevation:0, fillColor:"", type:null};
         tiles.push(tile);
       }
     }

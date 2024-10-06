@@ -29,11 +29,11 @@ class HexGrid {
     this.canvas.offset = 0;
   }
 
-  createGrid(fillColor = "transparent", lineColor = "black") {
+  createGrid(fillColor = "white", lineColor = "black", type = null) {
     const tiles = [];
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.columns; j++) {
-        const tile = { x: j, y: i, fill: fillColor, line: lineColor,type:'sea' };
+        const tile = { x: j, y: i, fill: fillColor, line: lineColor, type:type};
         tiles.push(tile);
       }
     }
@@ -170,7 +170,14 @@ class HexGrid {
 
     hexes.forEach((hex) => {
         const type = hex.type;
-       const filename = `${type}.jpg`
+       const filename = `${type}.png`
+
+               // Check if the type is null
+               if (type === null) {
+                // If type is null, just draw the hexagon with fill color and line
+                this.#drawImg(hex.x, hex.y, null, hex.fill, hex.line);
+                return; // Skip to the next hex
+            }
 
         // Check if the image is already cached
         if (!this.imageCache[type]) {
@@ -205,7 +212,7 @@ class HexGrid {
             hexes.forEach((hex) => {
                 const type = hex.type;
                 const img = this.imageCache[type];
-                this.#drawImg(hex.x, hex.y, img, hex.line);
+                this.#drawImg(hex.x, hex.y, img, hex.fill ,hex.line);
             });
         })
         .catch((error) => {
@@ -214,7 +221,7 @@ class HexGrid {
 }
 
 // Draws one single hex and the image within it
-#drawImg(x = 0, y = 0, image, line="black") {
+#drawImg(x = 0, y = 0, image, fillColor, line="black") {
   const centerYEven = y * this.apothem * 2 + this.startingY;
   const centerYOdd = centerYEven + this.apothem;
   const centerY = x % 2 === 0 ? centerYEven : centerYOdd;
@@ -229,9 +236,12 @@ class HexGrid {
       this.ctx.lineTo(xx, yy);
   }
   this.ctx.closePath();
-  
+
   this.ctx.save(); // Save the current context state
   this.ctx.clip(); // Clip the canvas to the hexagon before drawing image
+
+  this.ctx.fillStyle = `${fillColor}`;
+  this.ctx.fill();
 
   // Draw the image inside the hexagon
   if (image) {
