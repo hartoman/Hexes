@@ -1,18 +1,15 @@
 export const createMap = (maxPeaks=1, maximumElevation=7, rows, cols) => {
     const tiles = createBasicTiles(rows, cols);
 
- //   const randomX = randomBetween(0, cols - 1); // Ensure it does not exceed cols-1
- //   const randomY = randomBetween(0, rows - 1); // Ensure it does not exceed rows-1
-
- //   setElevation(maximumElevation, randomX, randomY);
-
 
         // define place for each of the peaks
         for (let i = 0; i < maxPeaks; i++) {
 
-            const randomX = randomBetween(0, cols - 1); // Ensure it does not exceed cols-1
-            const randomY = randomBetween(0, rows - 1); // Ensure it does not exceed rows-1
+        //    const randomX = randomBetween(0, cols - 1); // Ensure it does not exceed cols-1
+        //    const randomY = randomBetween(0, rows - 1); // Ensure it does not exceed rows-1
        
+            const randomX = randomBetween(maximumElevation, cols - 1-maximumElevation); // Ensure it does not exceed cols-1 and that the marginal tiles will be sea
+            const randomY = randomBetween(maximumElevation, rows - 1-maximumElevation); // Ensure it does not exceed rows-1
 
             // guarrantees that 1st peak will be at max elevation, while the rest will be more random
             if (i == 0) {
@@ -25,7 +22,7 @@ export const createMap = (maxPeaks=1, maximumElevation=7, rows, cols) => {
 
 
     adaptElevationToColors(tiles)
-    console.log(tiles);
+  //  console.log(tiles);
     return tiles;
 
     function setElevation(maxElevation, x, y) {
@@ -101,19 +98,30 @@ function getRandomBoolean() {
 
 function adaptElevationToColors(tiles){
 
+    
+    const pathStone1 = '../assets/images/stone1.png';
+    const pathStone2 = '../assets/images/stone2.png';
+    const pathTree = '../assets/images/tree.png';
+    const pathTree1 = '../assets/images/tree1.png';
+    const pathTree2 = '../assets/images/tree2.png';
+    const pathSea = '../assets/images/sea.jpg';
+    const pathCastle = '../assets/images/castle.png';
+
     const colorMapping =new Map()
-    colorMapping.set(0,"blue")
-    colorMapping.set(1,"wheat")
-    colorMapping.set(2,"lightgreen")
-    colorMapping.set(3,"green")
-    colorMapping.set(4,"darkgreen")
-    colorMapping.set(5,"darkgray")
-    colorMapping.set(6,"lightgray")
-    colorMapping.set(7,"white")
+    colorMapping.set(0,["blue","lightblue",pathSea])
+    colorMapping.set(1,["wheat","wheat",null])
+    colorMapping.set(2,["limegreen","limegreen",pathTree2])
+    colorMapping.set(3,["green","green",null])
+    colorMapping.set(4,["darkgreen","darkgreen",pathTree1])
+    colorMapping.set(5,["darkgray","darkgray",pathTree])
+    colorMapping.set(6,["lightgray","lightgray",pathStone2])
+    colorMapping.set(7,["white","white",pathCastle])
 
     tiles.forEach(tile => {
-        const color = colorMapping.get(tile.elevation);
-        tile.fill =color;
+        const tileVariables = colorMapping.get(tile.elevation);
+        tile.fill =tileVariables[0];
+        tile.line=tileVariables[1];
+        tile.image=tileVariables[2];
     });
 }
 

@@ -3,8 +3,8 @@ import { createMap } from "./mapgen.js";
 
 $(function () {
 
-  const MAP_ROWS = 10
-  const MAP_COLUMNS = 10;
+  const MAP_ROWS = 20
+  const MAP_COLUMNS = 20;
   const RADIUS = 20;
   let backgroundCanvas;
   let foregroundCanvas;
@@ -30,14 +30,13 @@ $(function () {
   }
 
   function useCanvas() {
-  
-  
+   
 
     // get basic layout from the hexgrid
-     const tiles = backgroundCanvas.createGrid("green", "lightgreen","tree");
+  //   const tiles = backgroundCanvas.createGrid("green", "lightgreen","tree");
 
     // get randomized color map
- //   const tiles = createMap(75,7,MAP_ROWS,MAP_COLUMNS); 
+    const tiles = createMap(3,7,MAP_ROWS,MAP_COLUMNS); 
 
 
      // images

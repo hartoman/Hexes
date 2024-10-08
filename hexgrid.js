@@ -29,11 +29,11 @@ class HexGrid {
     this.canvas.offset = 0;
   }
 
-  createGrid(fillColor = "white", lineColor = "black", type = null) {
+  createGrid(fillColor = "white", lineColor = "black", image = null) {
     const tiles = [];
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.columns; j++) {
-        const tile = { x: j, y: i, fill: fillColor, line: lineColor, type:type};
+        const tile = { x: j, y: i, fill: fillColor, line: lineColor, image:image};
         tiles.push(tile);
       }
     }
@@ -169,18 +169,17 @@ class HexGrid {
     const hexImagePromises = [];
 
     hexes.forEach((hex) => {
-        const type = hex.type;
-       const filename = `${type}.png`
+        const filename = hex.image;
 
-               // Check if the type is null
-               if (type === null) {
-                // If type is null, just draw the hexagon with fill color and line
+               // Check if the filename is null
+               if (filename === null) {
+                // If filename is null, just draw the hexagon with fill color and line
                 this.#drawImg(hex.x, hex.y, null, hex.fill, hex.line);
                 return; // Skip to the next hex
             }
 
         // Check if the image is already cached
-        if (!this.imageCache[type]) {
+        if (!this.imageCache[filename]) {
             // If not cached, prepare to load it
 
             const img = new Image();
@@ -189,12 +188,12 @@ class HexGrid {
             // Cache the image when it loads
             const loadPromise = new Promise((resolve, reject) => {
                 img.onload = () => {
-                    this.imageCache[type] = img;
+                    this.imageCache[filename] = img;
                     resolve();
                 };
                 img.onerror = () => {
-                    console.error(`Failed to load image: ${type}`);
-                    reject(new Error(`Failed to load image: ${type}`));
+                    console.error(`Failed to load image: ${filename}`);
+                    reject(new Error(`Failed to load image: ${filename}`));
                 };
             });
 
@@ -208,10 +207,9 @@ class HexGrid {
     // Wait for all images to load
     Promise.all(hexImagePromises)
         .then(() => {
-          console.log(this.imageCache)
             hexes.forEach((hex) => {
-                const type = hex.type;
-                const img = this.imageCache[type];
+                const filename = hex.image;
+                const img = this.imageCache[filename];
                 this.#drawImg(hex.x, hex.y, img, hex.fill ,hex.line);
             });
         })
