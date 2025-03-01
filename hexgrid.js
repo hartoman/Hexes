@@ -3,6 +3,7 @@ class HexGrid {
     el,
     { rows = 0, columns = 0, radius = 0, fitToGrid = false, startCenterX = false, startCenterY = false }
   ) {
+    this.hasCoordinates = true;
     this.canvas = $(el)[0];
     this.ctx = $(el)[0].getContext("2d");
     this.rows = rows;
@@ -38,13 +39,6 @@ class HexGrid {
       }
     }
     return tiles;
-  }
-
-  drawHexes(hexes = []) {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    hexes.map((hex) => {
-      this.#drawHex(hex.x, hex.y, hex.fill, hex.line);
-    });
   }
 
   // draws one single hex around the center
@@ -158,7 +152,7 @@ class HexGrid {
       const filename = hex.image;
 
       // Check if the filename is null
-      if (filename === null) {
+      if (filename === null || filename === undefined) {
         // If filename is null, just draw the hexagon with fill color and line
         this.#drawImg(hex.x, hex.y, null, hex.fill, hex.line);
         return; // Skip to the next hex
@@ -220,10 +214,8 @@ class HexGrid {
       this.ctx.lineTo(xx, yy);
     }
     this.ctx.closePath();
-
     this.ctx.save(); // Save the current context state
     this.ctx.clip(); // Clip the canvas to the hexagon before drawing image
-
     this.ctx.fillStyle = `${fillColor}`;
     this.ctx.fill();
 
@@ -231,16 +223,32 @@ class HexGrid {
     if (image) {
       this.ctx.drawImage(
         image,
-        centerX - this.circumradius,
-        centerY - this.apothem,
-        this.circumradius * 2,
-        this.apothem * 2
+        centerX - this.circumradius*.75,
+        centerY - this.apothem*.5,
+        this.circumradius * 1.5,
+        this.apothem * 1.5
       );
     }
 
     this.ctx.restore(); // Reset the context to the saved state
     this.ctx.strokeStyle = line; // Default line color, can be parameterized if needed
+
+    if (this.hasCoordinates) {
+      this.ctx.textBaseline = "bottom";
+      this.ctx.textAlign = "center";
+      this.ctx.fillText(`${x},${y}`, centerX, centerY - this.apothem / 2); /* TODO: take these centrally */
+    }
+
     this.ctx.stroke();
   }
 }
 export default HexGrid;
+
+/*
+  drawHexes(hexes = []) {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    hexes.map((hex) => {
+      this.#drawHex(hex.x, hex.y, hex.fill, hex.line);
+    });
+  }
+*/

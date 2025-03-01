@@ -93,31 +93,30 @@ export class MapGenerator {
   }
 
   setupColorMappings(mapConfiguration = null) {
-      const pathSea = "../assets/images/sea.jpg";      
-      const pathWasteland = "../assets/svgs/wasteland.svg";
-      const pathSwamp = "../assets/svgs/swamp.svg";
-    const pathForest = "../assets/svgs/forest.svg";
-    const pathHill = "../assets/svgs/hill.svg";
-    const pathMountain = "../assets/svgs/mountain.svg";
-
-  //  const pathCastle = "../assets/svgs/castle.png";
+    const pathStone1 = "../assets/images/stone1.png";
+    const pathStone2 = "../assets/images/stone2.png";
+    const pathTree = "../assets/images/tree.png";
+    const pathTree1 = "../assets/images/tree1.png";
+    const pathTree2 = "../assets/images/tree2.png";
+    const pathSea = "../assets/images/sea.jpg";
+    const pathCastle = "../assets/images/castle.png";
 
     const defaultConfig = [
-      // sea
-      [0, ["DeepSkyBlue", "DeepSkyBlue", null]],
-      // wasteland
-      [1, ["wheat", "wheat", pathWasteland]],
+      //sea
+      [0, ["blue", "lightblue", pathSea]],
+      // beach- sand
+      [1, ["wheat", "wheat", null]],
       // swamp
-      [2, ["DarkSeaGreen", "DarkSeaGreen", pathSwamp]],
+      [2, ["limegreen", "limegreen", pathTree2]],
       // valley
-      [3, ["lightgreen", "lightgreen", null]],
+      [3, ["green", "green", null]],
       // forest
-      [4, ["ForestGreen", "ForestGreen", pathForest]],
+      [4, ["darkgreen", "darkgreen", pathTree1]],
       // hill
-      [5, ["darkgray", "darkgray", pathHill]],
+      [5, ["darkgray", "darkgray", pathStone1]],
       // mountain
-      [6, ["gray", "gray", pathMountain]],
-      
+      [6, ["lightgray", "lightgray", pathStone2]],
+      //   [7, ["white", "white", pathCastle]],
     ];
 
     let mapConfig = mapConfiguration !== null ? mapConfiguration : defaultConfig;
