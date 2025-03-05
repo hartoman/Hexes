@@ -1,7 +1,7 @@
 class HexGrid {
   constructor (el, config) {    
     this.config = config;
-    this.hasCoordinates = true;
+    this.hasCoordinates = config.hasCoordinates || false;
     this.canvas =document.getElementById(el) 
     this.ctx = this.canvas.getContext("2d");
     this.rows = config.rows;
@@ -20,8 +20,8 @@ class HexGrid {
   #normalizeCanvas() {
     const canvasWidth = this.columns * this.edge - (this.edge - 2 * this.startingX);
     const canvasHeight = this.rows * this.apothem * 2 - (this.apothem - 2 * this.startingY);
-    this.canvas.width = this.config.fitToGrid ? canvasWidth : 100;
-    this.canvas.height = this.config.fitToGrid ? canvasHeight : 100;
+    this.canvas.width = this.config.fitToGrid ? canvasWidth : 1000;
+    this.canvas.height = this.config.fitToGrid ? canvasHeight : 800;
     this.canvas.offset = 0;
   }
 
@@ -200,7 +200,7 @@ class HexGrid {
   }
 
   // Draws one single hex and the image within it
-  #drawImg(x = 0, y = 0, image, fillColor, line = "black") {
+  #drawImg(x = 0, y = 0, image, fillColor='white', line = "black") {
     const centerYEven = y * this.apothem * 2 + this.startingY;
     const centerYOdd = centerYEven + this.apothem;
     const centerY = x % 2 === 0 ? centerYEven : centerYOdd;

@@ -37,7 +37,7 @@ class MapGenerator {
     this.tiles.forEach((tile) => this.setTileProperties(tile));
   };
 
-  setElevation(maxElevation, x, y, depth = 0) {
+  setElevation(maxElevation, x, y, depth = 0, visited = new Set()) {
     const MAX_DEPTH = 100; // Set a maximum recursion depth  
     // Ensure that x and y are within bounds
     if (maxElevation <= this.minimumElevation || x < 0 || x >= this.cols || y < 0 || y >= this.rows || depth > MAX_DEPTH) {
@@ -45,10 +45,12 @@ class MapGenerator {
     }  
     const tile = this.tiles.find((tile) => tile.x === x && tile.y === y);    
     // If the tile does not exist or has already been visited, exit the function
-    if (!tile) {
+    if (!tile || visited.has(`${x},${y}`)) {
       return;
     }
   
+    // Mark the tile as visited
+ //   visited.add(`${x},${y}`);
     tile.elevation = maxElevation;
 
     if (maxElevation > this.minimumElevation) {
@@ -58,7 +60,7 @@ class MapGenerator {
         const newElevation = maxElevation-randomBetween(1,2) // 1;
         // Only recurse if the neighbor's elevation is less than the current elevation
         if ( newElevation > neighbor.elevation) {
-          this.setElevation(newElevation, neighbor.x, neighbor.y, depth + 1);
+          this.setElevation(newElevation, neighbor.x, neighbor.y, depth + 1, visited);
         }
       });
     }
