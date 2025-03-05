@@ -1,33 +1,34 @@
 class HexGrid {
-  constructor(
-    el,
-    { rows = 0, columns = 0, radius = 0, fitToGrid = false, startCenterX = false, startCenterY = false }
-  ) {
+  constructor (el, config) {    
+    this.config = config;
     this.hasCoordinates = true;
-    this.canvas = $(el)[0];
-    this.ctx = $(el)[0].getContext("2d");
-    this.rows = rows;
-    this.columns = columns;
-    this.circumradius = radius;
+    this.canvas =document.getElementById(el) 
+    this.ctx = this.canvas.getContext("2d");
+    this.rows = config.rows;
+    this.columns = config.columns;
+    this.circumradius = config.radius;
     this.apothem = this.circumradius * (Math.sqrt(3) / 2); // the height difference of odd-numbered cells
     this.edge = Math.sqrt(3) * this.circumradius * Math.cos(Math.PI / 6);
     this.angle = Math.PI / 3;
-    this.startingX = startCenterX ? 0 : this.circumradius; // grid starts from centerX of first hex. zero value means start from top
-    this.startingY = startCenterY ? 0 : this.apothem; // grid starts from left corner of first hex. zero value means start from centerY
-
-    this.#normalizeCanvas(fitToGrid);
+    this.startingX = this.config.startCenterX ? 0 : this.circumradius; // grid starts from centerX of first hex. zero value means start from top
+    this.startingY = this.config.startCenterY ? 0 : this.apothem; // grid starts from left corner of first hex. zero value means start from centerY
     this.imageCache = {};
 
-    console.log(`HexGrid attached to ${$(el).attr("id")}`);
-    console.log(`rows:${this.rows}, columns:${this.columns}, radius:${this.circumradius}`);
+    this.initialize()
   }
 
-  #normalizeCanvas(fitToGrid) {
+  #normalizeCanvas() {
     const canvasWidth = this.columns * this.edge - (this.edge - 2 * this.startingX);
     const canvasHeight = this.rows * this.apothem * 2 - (this.apothem - 2 * this.startingY);
-    this.canvas.width = fitToGrid ? canvasWidth : 100;
-    this.canvas.height = fitToGrid ? canvasHeight : 100;
+    this.canvas.width = this.config.fitToGrid ? canvasWidth : 100;
+    this.canvas.height = this.config.fitToGrid ? canvasHeight : 100;
     this.canvas.offset = 0;
+  }
+
+  initialize() {
+    this.#normalizeCanvas();
+    console.log(`HexGrid attached to ${this.canvas.getAttribute('id')}`);
+    console.log(`rows:${this.rows}, columns:${this.columns}, radius:${this.circumradius}`);
   }
 
   createGrid(fillColor = "white", lineColor = "black", image = null) {
@@ -223,8 +224,8 @@ class HexGrid {
     if (image) {
       this.ctx.drawImage(
         image,
-        centerX - this.circumradius*.75,
-        centerY - this.apothem*.5,
+        centerX - this.circumradius * 0.75,
+        centerY - this.apothem * 0.5,
         this.circumradius * 1.5,
         this.apothem * 1.5
       );

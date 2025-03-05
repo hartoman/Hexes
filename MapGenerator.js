@@ -6,7 +6,8 @@ export class MapGenerator {
     this.cols = config.cols || 0;
     this.isIslandMap = config.isIslandMap || false;
     this.tiles = this.createBasicTiles();
-    this.colorMappings = this.setupColorMappings();
+    this.colorScheme = null; 
+    this.iconScheme = null;
   }
 
   createMap = () => {
@@ -33,31 +34,38 @@ export class MapGenerator {
     this.tiles.forEach((tile) => this.setTileProperties(tile));
   };
 
-  setElevation(maxElevation, x, y) {
+  setElevation(maxElevation, x, y, depth = 0, visited = new Set()) {
+    const MAX_DEPTH = 100; // Set a maximum recursion depth
+  
     // Ensure that x and y are within bounds
-    if (maxElevation <= 0 || x < 0 || x >= this.cols || y < 0 || y >= this.rows) {
+    if (maxElevation <= 0 || x < 0 || x >= this.cols || y < 0 || y >= this.rows || depth > MAX_DEPTH) {
       return;
     }
+  
     const tile = this.tiles.find((tile) => tile.x === x && tile.y === y);
-    // If the tile does not exist, exit the function
-    if (!tile) {
+    
+    // If the tile does not exist or has already been visited, exit the function
+    if (!tile || visited.has(`${x},${y}`)) {
       return;
     }
-
-    if (maxElevation > tile.elevation) {
-      tile.elevation = maxElevation;
-    } 
+  
+    // Mark the tile as visited
+    visited.add(`${x},${y}`);
+    tile.elevation = maxElevation;
 
     if (maxElevation > 0) {
-      const neighbors = this.getNeighborTiles(tile);  
+      const neighbors = this.getNeighborTiles(tile);
+      this.shuffleArray(neighbors)
       neighbors.forEach(neighbor => {
-   //    const newElevation = this.randomBetween(2, 12) > 2 ? this.randomBetween(1, 2) : 0;
-        const newElevation = this.randomBetween(1, 2)
-        this.setElevation(maxElevation - newElevation, neighbor.x, neighbor.y)
-      })
+        const newElevation = maxElevation-this.randomBetween(1, 2);
+        // Only recurse if the neighbor's elevation is less than the current elevation
+        if ( newElevation > neighbor.elevation) {
+          this.setElevation(newElevation, neighbor.x, neighbor.y, depth + 1, visited);
+        }
+      });
     }
   }
-
+  
   getNeighborTiles=(tile)=> {
     return this.tiles.filter(neighbortile =>
       neighbortile.x === tile.x && neighbortile.y === tile.y-1 ||
@@ -92,47 +100,40 @@ export class MapGenerator {
     return Math.random() < 0.5; // Returns true if random number is less than 0.5, otherwise false
   }
 
-  setupColorMappings(mapConfiguration = null) {
-      const pathSea = "../assets/svgs/sea color.svg";      
-      const pathWasteland = "../assets/svgs/wasteland color.svg";
-      const pathSwamp = "../assets/svgs/swamp color.svg";
-    const pathForest = "../assets/svgs/forest color.svg";
-    const pathHill = "../assets/svgs/hill color.svg";
-    const pathMountain = "../assets/svgs/mountain color.svg";
+  setupColorScheme=(colorScheme = null) =>{
+    const colorMap = new Map(colorScheme);
+    this.colorScheme= colorMap;
+  }
 
-  //  const pathCastle = "../assets/svgs/castle.png";
-
-    const defaultConfig = [
-      // sea
-      [0, ["DeepSkyBlue", "lightblue", null]],
-      // wasteland
-      [1, ["wheat", "wheat", pathWasteland]],
-      // swamp
-      [2, ["DarkSeaGreen", "DarkSeaGreen", pathSwamp]],
-      // valley
-      [3, ["lightgreen", "lightgreen", null]],
-      // forest
-      [4, ["ForestGreen", "ForestGreen", pathForest]],
-      // hill
-      [5, ["darkgray", "darkgray", pathHill]],
-      // mountain
-      [6, ["gray", "gray", pathMountain]],
-      
-    ];
-
-    let mapConfig = mapConfiguration !== null ? mapConfiguration : defaultConfig;
-    const colorMap = new Map(mapConfig);
-    return colorMap;
+  setupIconScheme = (iconScheme = null) => {
+    const iconMap = new Map(iconScheme);
+    this.iconScheme= iconMap;  
   }
 
   setTileProperties = (tile) => {
-    const tileVariables = this.colorMappings.get(tile.elevation);
-    tile.fill = tileVariables[0];
-    tile.line = tileVariables[1];
-    tile.image = tileVariables[2];
+    this.setTileColor(tile)
+    this.setTileImage(tile)
   };
 
-  getTileset = () => {
+  setTileColor = (tile) => {
+    const colors = this.colorScheme.get(tile.elevation);
+    tile.fill = colors[0];
+    tile.line = colors[1];
+  }
+
+  setTileImage = (tile) => {
+    const icons = this.iconScheme.get(tile.elevation);
+    tile.image = icons;
+  }
+
+  getTiles = () => {
     return this.tiles;
   };
+
+  shuffleArray(array) {
+    for (let i = array.length - 1; i >= 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
 }
